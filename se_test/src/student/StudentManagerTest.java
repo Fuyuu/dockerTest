@@ -37,3 +37,5 @@ class StudentManagerTest {
 		assertThrows(IllegalArgumentException.class, () -> studentManager.removeStudent("userA"));
 	}
 }
+
+//주석달
