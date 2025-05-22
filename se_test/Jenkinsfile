@@ -1,13 +1,25 @@
+// Jenkisfile
 pipeline {
-    agent any
-
+    agent any // 필요한 에이전트 지정
+	
+	/*========
+     * 변수 정의
+     *========*/
     environment {
         JUNIT_JAR_URL = 'https://repo1.maven.org/maven2/org/junit/platform/junit-platform-console-standalone/1.7.1/junit-platform-console-standalone-1.7.1.jar'
         JUNIT_JAR_PATH = 'lib/junit.jar'
         CLASS_DIR = 'classes'
         REPORT_DIR = 'test-reports'
+        
+        // 공통 수신자 목록 (쉼표로 여러 명)
+        RECIPIENTS = 'mg3515@naver.com'
+        // 이메일 제목에 넣을 프로젝트 이름
+        PROJECT = 'SoftwareEngineering Test'
     }
-
+	
+	/*========
+     * 단계 정의
+     *========*/
     stages {
         stage('Checkout') {
             steps {
@@ -55,12 +67,31 @@ pipeline {
             }
         }
     }
-
+	
+	/*========
+     *  빌드 후 작업
+     *========*/
     post {
         always {
             echo "[*] Archiving test results..."
             junit "${REPORT_DIR}/**/*.xml"
             archiveArtifacts artifacts: "${REPORT_DIR}/**/*", allowEmptyArchive: true
+            
+            emailext(
+                to: "${RECIPIENTS}",
+                subject: "[${currentBuild.currentResult}] ${PROJECT} #${BUILD_NUMBER}",
+                body: """
+${PROJECT} 파이프라인이 종료되었습니다.
+
+* Result:		${currentBuild.currentResult}
+* Branch:		${GIT_BRANCH}
+* Commit:		${GIT_COMMIT}
+* BuildNum:		#${BUILD_NUMBER}
+* BuildLog:		${BUILD_URL}
+
+(이 메일은 모든 빌드 종료 시 자동 발송됩니다.)
+"""
+            )
         }
 
         failure {
