@@ -23,5 +23,10 @@ public class BookManager
         }
         books.remove(title);
     }
+    // 책 존재 여부 확인
+    public boolean hasBook(String title) {
+        return books.contains(title);
+    }
+
 	// C011039 작업 끝
 }
